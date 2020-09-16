@@ -1,0 +1,88 @@
+#include<cstdio>
+
+using namespace std;
+
+#define N 10	// this code will work only for 10 nodes, change it if you need more
+#define CONNECTED 1
+#define DISCONNECTED 0
+
+int graph[N+1][N+1], explored[N+1];
+int nodes, edges, start_node, goal_node;
+
+void read_graph();
+int DFS(int selected_node);
+
+int main()
+{
+	read_graph();
+
+	if(DFS(start_node) == 1)	// if goal found DFS() returns 1 and this condition will be true
+		printf("Goal Found...\n");
+	else
+		printf("Goal Not Found...\n");
+	
+	return 0;
+}
+
+/*
+This function reads graph information from a file and initialize graph array accordingly.
+First line of file contains number of nodes of the graph.
+Second line contains number of edges of the graph.
+Then we have numbers of integers which is twice of edge number.
+Last line cantains start and goal node information.
+*/
+void read_graph()
+{
+	int s, d;
+
+	freopen("tree_input.txt", "r", stdin);
+	
+	scanf("%d", &nodes);	// first value is for number of nodes
+	scanf("%d", &edges);	// second value is for number of edges
+
+	// initially all nodes are disconnected
+	// so, initialize matrix with zeros
+	for(int i=1; i<=nodes; i++)
+	{
+		explored[i] = 0;	// zero indicates node "i" is stil unexplored
+		for(int j=1; j<=nodes; j++)
+			graph[i][j] = DISCONNECTED;
+	}
+
+	// read edges, place one in appropriate cell (bidirectional graph)
+	// we have pairs of information which is equal to edge number
+	for(int i=1; i<=edges; i++)
+	{
+		scanf("%d %d", &s, &d);
+		graph[s][d] = graph[d][s] = CONNECTED;
+	}
+
+	scanf("%d %d", &start_node, &goal_node);	// in last line, first one is start and second one is goal node
+}
+
+int DFS(int selected_node)
+{
+	printf("Visit node -> %d\n", selected_node);	// print in which order we are visiting nodes
+
+	// check if selected node is our goal node or not, if yes return 1(indicates goal found)
+	if(selected_node == goal_node)
+		return 1;
+
+	// mark selected node as explored
+	explored[selected_node] = 1;
+	
+	// find all neighbors for selected node
+	for(int i=1; i<=N; i++)
+	{
+		// if we have a neighbor of selected node which is not explored, insert it into the queue for future visiting
+		if(graph[selected_node][i] == CONNECTED && explored[i] == 0)
+		{
+			// visit neighbor of selected node by recursive call
+			// if goal node found return 1, otherwise try for next neighbor
+			if(DFS(i) == 1)
+				return 1;
+		}
+	} 
+
+	return -1;	// if goal node not found for any neighbor of selected node, return -1(indicates goal not found)
+}
